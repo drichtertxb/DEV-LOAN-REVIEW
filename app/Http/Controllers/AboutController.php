@@ -11,7 +11,7 @@ class AboutController extends Controller {
     public function index() {
 
         // Get list of loaded extensions.
-        $modulesList = '<table border=2 width="200" align="center"><tr><td align="center"> Loaded Modules </td></tr><tr><td>';
+        $modulesList = '<table border=2 width="200" align="center"><tr><td align="center"> Loaded Modules for Laravel ' .  app()->version() . '</td></tr><tr><td>';
         $extArray = get_loaded_extensions();
         foreach($extArray as $module) {
             $modulesList .= $module . ',  ';
@@ -25,6 +25,6 @@ class AboutController extends Controller {
         ob_clean();
 
         // Return everything.
-        return view('about') . '<br>' . $modulesList . '<br>' . $phpinfoData;
+        return view('about') .  '<br>' . $modulesList . '<br>' . $phpinfoData;
     }
 }
