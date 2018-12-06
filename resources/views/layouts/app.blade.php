@@ -34,6 +34,11 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav mr-auto">
+                        <a href="{{ url('/home') }}">Home</a>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <a href="{{ url('/ldaptest') }}">LDAP-Test1</a>
+                    </ul>
+                    <ul  class="navbar-nav ml-auto">
 
                     </ul>
 

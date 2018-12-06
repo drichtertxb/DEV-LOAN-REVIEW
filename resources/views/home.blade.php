@@ -1,7 +1,5 @@
 @extends('layouts.app')
-@section('content')
-<!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -63,10 +61,15 @@
 
         .m-b-md {
             margin-bottom: 30px;
+            font-weight: bold;
         }
     </style>
 </head>
-<body>
+
+@section('heading')
+@endsection
+
+@section('content')
 <div class="container">
     <div class="row justify-content-center">
         <div style="width:1000px;">
@@ -79,38 +82,37 @@
                             {{ session('status') }}
                         </div>
                     @endif
-                        <div class="content">
-                            <table width="100%" border-spacing: 20px 0;>
-                                <tr>
-                                    <td>
-                                        <div class="title m-b-md" style="text-align:center">
-                                            Loan Review
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="links" style="text-align:center">
-                                            <a href="https://laravel.com/docs">Documentation</a>
-                                            <a href="https://laracasts.com">Laracasts</a>
-                                            <a href="https://laravel-news.com">News</a>
-                                            <a href="https://nova.laravel.com">Nova</a>
-                                            <a href="https://forge.laravel.com">Forge</a>
-                                            <a href="https://github.com/laravel/laravel">GitHub</a>
-                                            <a href="/about">About</a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                </div>
+                    <div class="content">
+                        <table width="100%" border-spacing: 20px 0;>
+                            <tr>
+                                <td>
+                                    <div class="title m-b-md" style="text-align:center">
+                                        Loan Review
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="links" style="text-align:center">
+                                        <a href="https://laravel.com/docs">Documentation</a>
+                                        <a href="https://laracasts.com">Laracasts</a>
+                                        <a href="https://laravel-news.com">News</a>
+                                        <a href="https://nova.laravel.com">Nova</a>
+                                        <a href="https://forge.laravel.com">Forge</a>
+                                        <a href="https://github.com/laravel/laravel">GitHub</a>
+                                        <a href="/about">About</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+            </div>
             </div>
         </div>
     </div>
 </div>
 
-</body>
-</html>
 @endsection
+
 
 
