@@ -31,9 +31,22 @@ services:
     volumes:
       - ${HOST_VOLUME}:${VOLUME}
       - ${HOST_VOLUME}/${APACHE_LOG}:/var/log/apache2:rw
+      - ${HOST_VOLUME}/docker/app/resolv.conf:/etc/resolv.conf
+      - ${HOST_VOLUME}/docker/app/ldap/ca.pem:/etc/ldap/ca.pem
+      - ${HOST_VOLUME}/docker/app/ldap/ldap.conf:/etc/ldap/ldap.conf
+      - ${HOST_VOLUME}/docker/app/dhcp/dbclient.conf:/etc/dhcp/dbclient.conf
+      - ${HOST_VOLUME}/docker/app/hostname:/etc/hostname
+      - ${HOST_VOLUME}/docker/app/sssd/sssd.conf:/etc/sssd/sssd.conf
+      - ${HOST_VOLUME}/docker/app/sudoers:/etc/sudoers
     depends_on:
       - mysql
       - redis
+    extra_hosts:
+      - "PNG-DC1.PANDGASSOCIATES.COM PNG-DC1:192.168.25.162"
+      - "PNG-DC2.PANDGASSOCIATES.COM PNG-DC2:192.168.25.163"
+
+    hostname: "DRICHTER_DOCK1"
+    domainname: "PANDGASSOCIATES.COM"
 
   mysql:
     build: ./docker/mysql
@@ -50,4 +63,7 @@ services:
 
   redis:
     image: redis:latest
+
+
+
 

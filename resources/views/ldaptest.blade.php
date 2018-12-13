@@ -67,7 +67,7 @@
                 <tr>
                     <td align="center">
                         <h1 class="headline-title">Ldap Test</h1>
-                        <p class="headline-text">This is a test against a public LDAP server.</p>
+                        <p class="headline-text">This is a test against an LDAP server.</p>
                     </td>
                 </tr>
             </table>
