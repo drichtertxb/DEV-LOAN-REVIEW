@@ -13,16 +13,12 @@ class LdapTestController extends Controller {
     function ldapErrStr($ldapConn) {
 
         $data = '';
-
         $ldapInfo = " Here in " . __CLASS__ . "." . __METHOD__ . "-authenticated Bind failed - " . ldap_error($ldapConn) . "]";
         if(ldap_get_option($ldapConn, LDAP_OPT_DIAGNOSTIC_MESSAGE, $extended_error)) {
             $ldapInfo .= " Error Binding to LDAP: $extended_error";
         } else {
             $ldapInfo .= " Error Binding to LDAP: No additional information is available.";
         }
-        Log::info("ldap [" . $ldapInfo . "]");
-
-        // Bad connection.
         $data .= " Bad conection.";
     }
 
@@ -62,9 +58,9 @@ class LdapTestController extends Controller {
         } else {
 
             $memberRows     = array();
-            $filter = "(uniqueMember=*)";
-            $result = ldap_search($ldapConn, $args['ldapUser'], $filter);
-            $entryArray = $this->cleanUpEntry(ldap_get_entries($ldapConn, $result));
+            $filter         = "(uniqueMember=*)";
+            $result         = ldap_search($ldapConn, $args['ldapUser'], $filter);
+            $entryArray     = $this->cleanUpEntry(ldap_get_entries($ldapConn, $result));
 
             foreach ($entryArray['ou=mathematicians,dc=example,dc=com']['uniquemember'] as $member) {
                 $memberRows [] = explode('=', explode(",", $member)[0])[1];
@@ -102,55 +98,42 @@ class LdapTestController extends Controller {
         return $rdata;
     }
 
-    function ldapPublicTestServerData($args, &$ldapConn) {
+    function ldapNonSSlConnect($args, &$ldapConn) {
 
         $ret = '';
         $ldapConn = ldap_connect($args['ldapHostIp'], $args['ldapPort']);
         if($ldapConn) {
             ldap_set_option($ldapConn, LDAP_OPT_PROTOCOL_VERSION, 3);
             ldap_set_option($ldapConn, LDAP_OPT_REFERRALS, 0);
-
-            if (@ldap_bind($ldapConn, $args['ldapAdminUser'], $args['ldapPasswd'])) {
-                // Here LoginController-authenticated Bind succeeded.";
-                $ret = $this->ldapPublicSearchResult($args, $ldapConn);
-
-            } else {
-                $errStr = "LDAP server connection failed with IP [" . $args['ldapHostIp'] . "], port [" . $args['ldapPort'] . "],  Admin User [" . $args['ldapUser'] . "], password [" . $args['ldapPasswd'] . "] . error [" . $this->ldapErrStr($ldapConn) . "]";
-                $ret .= $this->ldapPublicSearchResult($args, $ldapConn, $errStr );
+            if(! @ldap_bind($ldapConn, $args['ldapAdminUser'], $args['ldapPasswd'])) {
+                $ret = "LDAP server connection failed with IP [" . $args['ldapHostIp'] . "], port [" . $args['ldapPort'] . "],  Admin User [" . $args['ldapUser'] . "], password [" . $args['ldapPasswd'] . "] . error [" . $this->ldapErrStr($ldapConn) . "]";
             }
         }  else {
-            $ret = $this->ldapPublicSearchResult($args, $ldapConn,"LDAP server conection failed.");
+            $ret = "LDAP server conection failed.";
         }
-
-        return view('ldaptest') . '<br>' . $ret;
+        return $ret;
     }
 
-    function ldapPGServerData($args, &$ldapConn) {
+    function ldapSSLConnect($args, &$ldapConn) {
 
         $ret = '';
         $ldapConn = ldap_connect($args['ldapHost']);
         if($ldapConn) {
             ldap_set_option($ldapConn, LDAP_OPT_PROTOCOL_VERSION, 3);
             ldap_set_option($ldapConn, LDAP_OPT_REFERRALS, 0);
-
             ldap_start_tls($ldapConn);
-
-            if (@ldap_bind($ldapConn, $args['ldapAdminUser'], $args['ldapPasswd'])) {
-                //$ret = $this->ldapPGServerSearchResult($ldapConn, $args['ldapUser']," Connection established to server " . $args['ldapHost'] . " " );
-                $ret = $this->ldapPGServerSearchResult($args, $ldapConn);
-            } else {
-                $errStr = "LDAP server conection failed with IP [" . $args['ldapHostIp'] . "], port [" . $args['ldapPort'] . "],  Admin User [" . $args['ldapUser'] . "], password [" . $args['ldapPasswd'] . "] error [" .  $this->ldapErrStr($ldapConn) . "]";
-                $ret = $this->ldapPGServerSearchResult($args, $ldapConn, $errStr );
+            if(! @ldap_bind($ldapConn, $args['ldapAdminUser'], $args['ldapPasswd'])) {
+                $ret = "LDAP server conection failed with IP [" . $args['ldapHostIp'] . "], port [" . $args['ldapPort'] . "],  Admin User [" . $args['ldapUser'] . "], password [" . $args['ldapPasswd'] . "] error [" .  $this->ldapErrStr($ldapConn) . "]";
             }
         } else {
-            $ret = $this->ldapPGServerSearchResult($args, $ldapConn, "LDAP server conection failed.");
+            $ret = "LDAP server conection failed.";
         }
-
-        return view('ldaptest') . '<br>' . $ret;
+        return $ret;
     }
 
     public function index() {
 
+        $ret = '';
         $ldapConn = null;
         if(env("LDAP_SERVER") == "ldap.forumsys.com") {
 
@@ -161,7 +144,12 @@ class LdapTestController extends Controller {
                 "ldapUser"          => env("LDAP_TEST_USER"),
                 "ldapPasswd"        => env("LDAP_TEST_PASSWD"),
             );
-            return  $this->ldapPublicTestServerData($args, $ldapConn);
+            $ret = $this->ldapNonSSLConnect($args, $ldapConn);
+            if(empty($ret)) {
+                $ret = $this->ldapPublicSearchResult($args, $ldapConn);
+            } else {
+                $ret = $this->ldapPublicSearchResult($args, $ldapConn, $ret);
+            }
         } else  if(env("LDAP_SERVER") == "pandgassociates") {
 
             $args = array(
@@ -172,12 +160,18 @@ class LdapTestController extends Controller {
                 "ldapPort"          => env("LDAP_PG_PORT"),
                 "ldapPasswd"        => env("LDAP_PG_ADMIN_PASSWD"),
             );
-            return $this->ldapPGServerData($args, $ldapConn);
+            $ret = $this->ldapSSLConnect($args, $ldapConn);
+            if(empty($ret)) {
+                $ret = $this->ldapPGServerSearchResult($args, $ldapConn);
+            } else {
+                $ret = $this->ldapPGServerSearchResult($args, $ldapConn, $ret);
+            }
         }
 
         if($ldapConn && is_resource($ldapConn)) {
             ldap_unbind($ldapConn);
             $gLdapConn = null;
         }
+        return view('ldaptest') . '<br>' . $ret;
     }
 }
